@@ -6,16 +6,24 @@ import ProfileScreen
 import ResultsScreen
 import ScanScreen
 import SplashScreen
+import UserSelections
+import android.net.Uri
+import android.os.Bundle
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.smarthaircare.ui.components.BottomNavigationBar
+import com.google.gson.Gson
+import java.net.URLDecoder
+import java.net.URLEncoder
 
 @Composable
 fun NavGraph() {
@@ -24,7 +32,9 @@ fun NavGraph() {
     val currentRoute = currentBackStackEntry?.destination?.route
 
     val bottomNavScreens = listOf(Screen.Home, Screen.Scan, Screen.Profile)
-    val showBottomNav = currentRoute in bottomNavScreens.map { it.route }
+    val showBottomNav = currentRoute?.let { route ->
+        bottomNavScreens.any { screen -> route.startsWith(screen.route) }
+    } ?: false
 
     Scaffold(
         bottomBar = {
@@ -74,7 +84,12 @@ fun NavGraph() {
                     onNavigateBack = {
                         navController.popBackStack()
                     },
-                    onNavigateToResults = {
+                    // Instead of the complex navigation
+                    onNavigateToResults = { imageUri, scanResponse, userSelections ->
+                        ScanDataHolder.currentScanResponse = scanResponse
+                        ScanDataHolder.currentImageUri = imageUri
+                        ScanDataHolder.currentUserSelections = userSelections
+
                         navController.navigate(Screen.Results.route)
                     }
                 )
@@ -82,9 +97,10 @@ fun NavGraph() {
 
             composable(Screen.Results.route) {
                 ResultsScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
+                    imageUri = ScanDataHolder.currentImageUri ?: Uri.EMPTY,
+                    scanResponse = ScanDataHolder.currentScanResponse,
+                    userSelections = ScanDataHolder.currentUserSelections ?: UserSelections(),
+                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHome = {
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Home.route) { inclusive = true }

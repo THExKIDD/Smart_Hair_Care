@@ -52,9 +52,22 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.5")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.androidx.activity.compose)
+
+    implementation("androidx.compose.material3:material3:1.1.2")
         // Add this line for extended Material icons
     implementation ("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    // OkHttp (for logging and network operations)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // Gson (for JSON parsing)
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Coroutines (for async operations)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
         // Or if you're using BOM
     implementation ("androidx.compose.material:material-icons-extended")
     testImplementation(libs.junit)
