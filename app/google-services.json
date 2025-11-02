@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "543385534744",
+    "project_id": "smart-hair-care",
+    "storage_bucket": "smart-hair-care.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:543385534744:android:e31985ef5af6d550dfde6d",
+        "android_client_info": {
+          "package_name": "com.example.smarthaircare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "543385534744-lut1fihisrbshrutmvg900rv730n01s8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smarthaircare",
+            "certificate_hash": "9ffa9c6f772b91a4f20defcf424682c254a2865c"
+          }
+        },
+        {
+          "client_id": "543385534744-37erg1ltb723cufrqrhc54c0oh01ved6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzLCokJ6NBwfS3xRk--vcYupKRMSAnq0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "543385534744-37erg1ltb723cufrqrhc54c0oh01ved6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

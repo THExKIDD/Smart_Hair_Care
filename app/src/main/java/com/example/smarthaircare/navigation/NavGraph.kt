@@ -2,7 +2,6 @@ package com.example.smarthaircare.navigation
 
 import HomeScreen
 import OnboardingScreen
-import ProfileScreen
 import ResultsScreen
 import ScanScreen
 import SplashScreen
@@ -21,6 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.smarthaircare.ui.components.BottomNavigationBar
+import com.example.smarthaircare.ui.screens.AuthScreen
+import com.example.smarthaircare.ui.screens.ProfileScreen
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -30,6 +32,17 @@ fun NavGraph() {
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
+
+    // Check if user is authenticated
+    val auth = FirebaseAuth.getInstance()
+    val isAuthenticated = auth.currentUser != null
+
+    // Determine start destination based on auth state
+    val startDestination = if (isAuthenticated) {
+        Screen.Splash.route
+    } else {
+        Screen.Auth.route
+    }
 
     val bottomNavScreens = listOf(Screen.Home, Screen.Scan, Screen.Profile)
     val showBottomNav = currentRoute?.let { route ->
@@ -45,9 +58,20 @@ fun NavGraph() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Splash.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(paddingValues)
         ) {
+            // Auth Screen
+            composable(Screen.Auth.route) {
+                AuthScreen(
+                    onAuthSuccess = {
+                        navController.navigate(Screen.Splash.route) {
+                            popUpTo(Screen.Auth.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             composable(Screen.Splash.route) {
                 SplashScreen(
                     onNavigateToOnboarding = {
@@ -84,7 +108,6 @@ fun NavGraph() {
                     onNavigateBack = {
                         navController.popBackStack()
                     },
-                    // Instead of the complex navigation
                     onNavigateToResults = { imageUri, scanResponse, userSelections ->
                         ScanDataHolder.currentScanResponse = scanResponse
                         ScanDataHolder.currentImageUri = imageUri
@@ -113,6 +136,12 @@ fun NavGraph() {
                 ProfileScreen(
                     onNavigateBack = {
                         navController.popBackStack()
+                    },
+                    onSignOut = {
+                        // Navigate to auth screen and clear entire back stack
+                        navController.navigate(Screen.Auth.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 )
             }
