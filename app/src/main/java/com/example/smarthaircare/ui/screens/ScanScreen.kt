@@ -1,6 +1,8 @@
 import android.Manifest
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -37,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
+import com.example.smarthaircare.data.FirestoreRepository
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
@@ -130,13 +133,14 @@ fun ScanScreen(
     }
 
     // Process image with API
-    fun processImage() {
+    fun processImageAndSave() {
         capturedImageUri?.let { uri ->
             coroutineScope.launch {
                 isProcessing = true
                 errorMessage = null
 
                 try {
+                    // Step 1: Upload to API and get hair type
                     val response = apiService.uploadDocument(
                         context = context,
                         imageUri = uri
@@ -145,15 +149,48 @@ fun ScanScreen(
                     apiResponse = response
 
                     if (response != null && response.success) {
+                        val hairType = response.result?.predicted_hair_type ?: "Unknown"
+                        val confidence = response.result?.confidence_percentage ?: "0%"
+
+                        // Step 2: Get oil recommendations
+                        val recommendedOils = OilRecommendationEngine.getRecommendations(
+                            hairType = hairType,
+                            dandruffLevel = selectedDandruffLevel,
+                            hairLossStage = selectedHairLossStage
+                        ).map { it.name }
+
+                        // Step 3: Save to Firestore
+                        val firestoreRepo = FirestoreRepository()
+                        val saved = firestoreRepo.saveScanResult(
+                            hairType = hairType,
+                            confidence = confidence,
+                            dandruffLevel = selectedDandruffLevel,
+                            hairLossStage = selectedHairLossStage,
+                            recommendedOils = recommendedOils
+                        )
+
+                        if (saved) {
+                            Log.d("ScanScreen", "Scan result saved to Firestore successfully")
+                            Toast.makeText(
+                                context,
+                                "Scan result saved!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Log.w("ScanScreen", "Failed to save scan result to Firestore")
+                        }
+
+                        // Step 4: Navigate to results
                         val userSelections = UserSelections(
                             dandruffLevel = selectedDandruffLevel,
                             hairLossStage = selectedHairLossStage
                         )
                         onNavigateToResults(uri, response, userSelections)
                     } else {
-                        errorMessage = response?.success.toString() ?: "Failed to process image. Please try again."
+                        errorMessage = "Failed to process image. Please try again."
                     }
                 } catch (e: Exception) {
+                    Log.e("ScanScreen", "Error processing image", e)
                     errorMessage = "Network error. Please check your connection and try again."
                 } finally {
                     isProcessing = false
@@ -550,7 +587,7 @@ fun ScanScreen(
             if (capturedImageUri != null) {
                 item {
                     Button(
-                        onClick = { processImage() },
+                        onClick = { processImageAndSave() },
                         enabled = !isProcessing,
                         modifier = Modifier
                             .fillMaxWidth()

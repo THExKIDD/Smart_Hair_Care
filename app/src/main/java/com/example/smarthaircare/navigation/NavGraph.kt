@@ -7,7 +7,9 @@ import ScanScreen
 import SplashScreen
 import UserSelections
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,11 +24,13 @@ import androidx.navigation.navArgument
 import com.example.smarthaircare.ui.components.BottomNavigationBar
 import com.example.smarthaircare.ui.screens.AuthScreen
 import com.example.smarthaircare.ui.screens.ProfileScreen
+import com.example.smarthaircare.ui.screens.HistoryScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import java.net.URLDecoder
 import java.net.URLEncoder
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
@@ -113,7 +117,9 @@ fun NavGraph() {
                         ScanDataHolder.currentImageUri = imageUri
                         ScanDataHolder.currentUserSelections = userSelections
 
-                        navController.navigate(Screen.Results.route)
+                        navController.navigate(Screen.Results.route){
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -132,13 +138,24 @@ fun NavGraph() {
                 )
             }
 
+            // History Screen
+            composable(Screen.History.route) {
+                HistoryScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onNavigateBack = {
                         navController.popBackStack()
                     },
+                    onNavigateToHistory = {
+                        navController.navigate(Screen.History.route)
+                    },
                     onSignOut = {
-                        // Navigate to auth screen and clear entire back stack
                         navController.navigate(Screen.Auth.route) {
                             popUpTo(0) { inclusive = true }
                         }
