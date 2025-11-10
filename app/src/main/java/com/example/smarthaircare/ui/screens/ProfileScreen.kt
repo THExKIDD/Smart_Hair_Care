@@ -84,8 +84,7 @@ fun ProfileScreen(
             item {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
+                        .fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(8.dp),
                     shape = RoundedCornerShape(20.dp)
                 ) {

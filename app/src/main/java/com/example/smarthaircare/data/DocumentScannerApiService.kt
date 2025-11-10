@@ -69,7 +69,7 @@ class DocumentScannerApiService {
     companion object {
         private const val TAG = "DocumentScannerApi"
         private const val BASE_URL = "https://l3mmsdmx-3000.inc1.devtunnels.ms/" // Replace with your actual base URL
-        private const val TIMEOUT_SECONDS = 30L
+        private const val TIMEOUT_SECONDS = 60L
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
